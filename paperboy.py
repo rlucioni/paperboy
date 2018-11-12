@@ -74,6 +74,7 @@ class Paperboy():
             logger.info('no news today')
 
         # TODO: format and email stories!
+        # https://github.com/sendgrid/sendgrid-python
 
 
 def deliver():
