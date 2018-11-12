@@ -1,4 +1,4 @@
-# news
+# paperboy
 
 Brief morning news.
 
@@ -24,7 +24,7 @@ If you make a change and want to deploy again:
 
 Run the script:
 
-    $ make news
+    $ make paperboy
 
 Run the linter:
 

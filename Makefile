@@ -1,11 +1,11 @@
-news:
-	python news.py
+paperboy:
+	python paperboy.py
 
 deploy:
 	zappa deploy prod
 
 invoke:
-	zappa invoke prod 'news.check'
+	zappa invoke prod 'paperboy.deliver'
 
 lint:
 	flake8 .
