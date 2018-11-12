@@ -36,8 +36,6 @@ logger = logging.getLogger(__name__)
 
 
 class Paperboy():
-    # 20180403 - results
-    # 20181111 - no results
     def __init__(self, today=None):
         today = today or datetime.now().strftime('%Y%m%d')
         self.url = f'http://www.wsj.com/itp/{today}/us/whatsnews'
@@ -54,6 +52,11 @@ class Paperboy():
 
     def extract_stories(self, soup, css_class):
         column = soup.find('div', class_=css_class)
+
+        # find() returns None if it can't find a match
+        if not column:
+            return
+
         stories = column.find_all(self.is_story)
 
         return [story.text.strip() for story in stories]
@@ -64,14 +67,22 @@ class Paperboy():
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # TODO: format and email these!
         business_finance_stories = self.extract_stories(soup, 'mod_contentCol-1')
         world_stories = self.extract_stories(soup, 'mod_contentCol-2')
+
+        if not (business_finance_stories and world_stories):
+            logger.info('no news today')
+
+        # TODO: format and email stories!
 
 
 def deliver():
     try:
-        Paperboy(today='20180403').deliver()
+        # results
+        # Paperboy(today='20180403').deliver()
+
+        # no results
+        Paperboy(today='20181112').deliver()
     except:
         logger.exception('something went wrong')
 
