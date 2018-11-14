@@ -1,10 +1,12 @@
 import logging
-# import os
+import os
 from datetime import datetime
 from logging.config import dictConfig
 
 import requests
+import sendgrid
 from bs4 import BeautifulSoup
+from sendgrid.helpers.mail import Email, Content, Mail
 
 
 dictConfig({
@@ -35,10 +37,16 @@ dictConfig({
 logger = logging.getLogger(__name__)
 
 
+SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+TO_EMAILS = os.environ.get('TO_EMAILS', '').split(',')
+
+
 class Paperboy():
-    def __init__(self, today=None):
-        today = today or datetime.now().strftime('%Y%m%d')
+    def __init__(self, today=None, dry=True):
+        self.today = today or datetime.now().strftime('%Y%m%d')
         self.url = f'http://www.wsj.com/itp/{today}/us/whatsnews'
+
+        self.dry = dry
 
         self.headers = {
             'User-Agent': (
@@ -46,6 +54,8 @@ class Paperboy():
                 'Chrome/69.0.3497.100 Safari/537.36'
             )
         }
+
+        self.sg = sendgrid.SendGridAPIClient(apikey=SENDGRID_API_KEY)
 
     def is_story(self, tag):
         return tag.name == 'p' and not tag.text.startswith('Subscriber Content')
@@ -72,18 +82,42 @@ class Paperboy():
 
         if not (business_finance_stories and world_stories):
             logger.info('no news today')
+            return
 
-        # TODO: format and email stories!
-        # https://github.com/sendgrid/sendgrid-python
+        sg_from_email = Email('whatsnews@paperboy.com')
+        # TODO: prettier date
+        sg_subject = f"What's News for {self.today}"
+
+        business_finance_content = '\n\n'.join(['# Business and Finance'] + business_finance_stories)
+        world_content = '\n\n'.join(['# World'] + world_stories)
+
+        # TODO: html email
+        # TODO: incorporate on-this-day note (days repo) at the end
+        content = f'{world_content}\n\n{business_finance_content}'
+        sg_content = Content('text/plain', content)
+
+        if self.dry:
+            print(content)
+
+        for to_email in TO_EMAILS:
+            if self.dry:
+                logger.info(f'would send to {to_email}')
+            else:
+                sg_to_email = Email(to_email)
+                mail = Mail(sg_from_email, sg_subject, sg_to_email, sg_content)
+                response = self.sg.client.mail.send.post(request_body=mail.get())
+                logger.info(f'sendgrid email to {to_email} with status {response.status_code}')
 
 
 def deliver():
     try:
+        # Paperboy(dry=False).deliver()
+
         # results
-        # Paperboy(today='20180403').deliver()
+        Paperboy(today='20181113', dry=False).deliver()
 
         # no results
-        Paperboy(today='20181112').deliver()
+        # Paperboy(today='20181112').deliver()
     except:
         logger.exception('something went wrong')
 
