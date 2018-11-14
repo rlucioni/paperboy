@@ -111,10 +111,10 @@ class Paperboy():
 
 def deliver():
     try:
-        # Paperboy(dry=False).deliver()
+        Paperboy(dry=False).deliver()
 
         # results
-        Paperboy(today='20181113', dry=False).deliver()
+        # Paperboy(today='20181113', dry=False).deliver()
 
         # no results
         # Paperboy(today='20181112').deliver()
