@@ -26,7 +26,8 @@
         "profile_name": "default",
         "project_name": "paperboy",
         "runtime": "python3.6",
-        "s3_bucket": "paperboy",
+        // https://github.com/Miserlou/Zappa/issues/1398
+        "s3_bucket": "rlucioni-paperboy",
         "timeout_seconds": 30,
     }
 }
