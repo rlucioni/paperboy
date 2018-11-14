@@ -44,7 +44,7 @@ TO_EMAILS = os.environ.get('TO_EMAILS', '').split(',')
 class Paperboy():
     def __init__(self, today=None, dry=True):
         self.today = today or datetime.now().strftime('%Y%m%d')
-        self.url = f'http://www.wsj.com/itp/{today}/us/whatsnews'
+        self.url = f'http://www.wsj.com/itp/{self.today}/us/whatsnews'
 
         self.dry = dry
 
