@@ -6,6 +6,7 @@ from logging.config import dictConfig
 import requests
 import sendgrid
 from bs4 import BeautifulSoup
+from jinja2 import Environment, PackageLoader, select_autoescape
 from sendgrid.helpers.mail import Email, Content, Mail
 
 
@@ -36,6 +37,10 @@ dictConfig({
 
 logger = logging.getLogger(__name__)
 
+jinja_env = Environment(
+    loader=PackageLoader('paperboy', 'templates'),
+    autoescape=select_autoescape(['html', 'xml'])
+)
 
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 TO_EMAILS = os.environ.get('TO_EMAILS', '').split(',')
@@ -95,6 +100,13 @@ class Paperboy():
         # TODO: incorporate on-this-day note (days repo) at the end
         content = f'{world_content}\n\n{business_finance_content}'
         sg_content = Content('text/plain', content)
+
+        # http://jinja.pocoo.org/docs/2.10/api/#basics
+        # still want to send plain email content in addition to html!
+        # https://stackoverflow.com/questions/43240050/simple-way-to-send-an-html-text-email-using-sendgrid-python
+        # template = jinja_env.get_template('email.html')
+        # content = template.render(name='John Doe')
+        # sg_content = Content('text/html', content)
 
         if self.dry:
             print(content)
